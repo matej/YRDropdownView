@@ -129,7 +129,7 @@ static BOOL isRtl = NO; // keep rtl property here - danielgindi@gmail.com
         self.detailText = nil;
         self.minHeight = 44.0f;
         
-        self.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
         titleLabel = [[UILabel alloc] initWithFrame:self.bounds];
         detailLabel = [[UILabel alloc] initWithFrame:self.bounds];
@@ -526,7 +526,7 @@ static BOOL isRtl = NO; // keep rtl property here - danielgindi@gmail.com
     
     CGFloat dropdownHeight = 44.0f;
     if (self.detailText) {
-        dropdownHeight = MAX(CGRectGetMaxY(bounds), CGRectGetMaxY(detailLabel.frame));
+        dropdownHeight = CGRectGetMaxY(detailLabel.frame);
         dropdownHeight += VERTICAL_PADDING;
     } 
     self.dropdownHeight = dropdownHeight;
@@ -535,10 +535,6 @@ static BOOL isRtl = NO; // keep rtl property here - danielgindi@gmail.com
     BOOL rotated = UIInterfaceOrientationIsLandscape(orientation) && !self.isView;
     
     [self setFrame:CGRectMake(self.frame.origin.x, self.frame.origin.y, rotated?dropdownHeight:self.frame.size.width, rotated?self.frame.size.height:dropdownHeight)];
-    
-    titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | (self.detailText?UIViewAutoresizingFlexibleBottomMargin:0);
-    detailLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleTopMargin;
-    accessoryImageView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
     
     [self flipViewToOrientation:nil];
 }
