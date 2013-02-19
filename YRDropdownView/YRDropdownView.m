@@ -458,10 +458,7 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
                                                      self.frame.size.height);
                          }
                          completion:^(BOOL finished) {
-                             if (finished)
-                             {
                                  [self done];
-                             }
                          }];        
     }
     else 
