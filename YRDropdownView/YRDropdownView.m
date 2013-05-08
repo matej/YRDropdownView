@@ -9,10 +9,21 @@
 #import "YRDropdownView.h"
 #import <QuartzCore/QuartzCore.h>
 
+
+#define HORIZONTAL_PADDING 10.0f
+#define VERTICAL_PADDING 10.0f
+#define ACCESSORY_PADDING 0.0f
+#define TITLE_FONT_SIZE 16.0f
+#define DETAIL_FONT_SIZE 12.0f
+#define ANIMATION_DURATION 0.3f
+
+
 @implementation UILabel (YRDropdownView)
 
 - (void)sizeToFitFixedWidth:(CGFloat)fixedWidth {
-    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, fixedWidth, 0);
+	CGRect frame = self.frame;
+	frame.size.width = fixedWidth;
+    self.frame = frame;
     self.lineBreakMode = NSLineBreakByWordWrapping;
     self.numberOfLines = 0;
     [self sizeToFit];
@@ -20,103 +31,113 @@
 
 @end
 
-@interface YRDropdownView ()
-@property(nonatomic)float minHeight;
-@property(nonatomic)SEL onTouch;
-@property(nonatomic)BOOL shouldAnimate;
-@property(nonatomic,strong)UILabel *titleLabel;
-@property(nonatomic,strong)UILabel *detailLabel;
-@property(nonatomic,strong)UIView *accessoryView;
-@property(nonatomic,assign)dispatch_queue_t tapQueue;
-@property(nonatomic,unsafe_unretained) UIView *parentView;
-@property(nonatomic)BOOL isView;
-@property(nonatomic)float dropdownHeight;
+
+@interface YRDropdownView () {
+	UILabel *_titleLabel;
+	UILabel *_detailLabel;
+}
+
+@property (nonatomic, weak) UIView *parentView;
+@property (nonatomic, assign) BOOL shouldAnimate;
+@property (nonatomic, assign) CGFloat dropdownHeight;
 
 + (UIImageView *)imageViewWithImage:(UIImage *)image;
-- (void)updateTitleLabel:(NSString *)newText;
-- (void)updateDetailLabel:(NSString *)newText;
-- (void)hideWithAnimation:(NSNumber *)animated;
-- (void)done;
+
 @end
 
 
 @implementation YRDropdownView
 
-// Using this prevents two alerts to ever appear on the screen at the same time
-static YRDropdownView *currentDropdown = nil;
-static NSMutableArray *viewQueue = nil; // for queuing - danielgindi@gmail.com
-static BOOL isRtl = NO; // keep rtl property here - danielgindi@gmail.com
-static BOOL isQueuing = NO; // keep queuing property here - gregwym
+static YRDropdownView *__currentDropdown = nil;
+static NSMutableArray *__viewQueue = nil;
+static BOOL __isRtl = NO;
+static BOOL __isQueuing = NO;
 
-+ (void)toggleRtl:(BOOL)rtl;
+#pragma mark - Class Accessors
+
++ (void)toggleRtl:(BOOL)rtl
 {
-    isRtl = rtl;
+    __isRtl = rtl;
 }
 
 + (void)toggleQueuing:(BOOL)queuing
 {
-	isQueuing = queuing;
+	__isQueuing = queuing;
 }
 
 #pragma mark - Accessors
 
-- (NSString *)titleText
+- (UILabel *)titleLabel
 {
-    return self.titleLabel.text;
+	if (!_titleLabel) {
+		_titleLabel = [[UILabel alloc] init];
+		_titleLabel.font = [UIFont boldSystemFontOfSize:TITLE_FONT_SIZE];
+		_titleLabel.adjustsFontSizeToFitWidth = NO;
+		_titleLabel.opaque = NO;
+		_titleLabel.backgroundColor = [UIColor clearColor];
+		_titleLabel.textColor = [UIColor colorWithWhite:0.225f alpha:1.0f];
+		_titleLabel.shadowOffset = CGSizeMake(0, 1);
+		_titleLabel.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+		if (__isRtl) {
+            _titleLabel.textAlignment = self.detailLabel.textAlignment = NSTextAlignmentRight;
+        }
+		[self addSubview:_titleLabel];
+		[self setNeedsLayout];
+	}
+	return _titleLabel;
 }
 
-- (void)setTitleText:(NSString *)newText
+- (UILabel *)detailLabel
 {
-    if ([NSThread isMainThread]) {
-		[self updateTitleLabel:newText];
+	if (!_detailLabel) {
+		_detailLabel = [[UILabel alloc] init];
+		_detailLabel.font = [UIFont systemFontOfSize:DETAIL_FONT_SIZE];
+		_detailLabel.numberOfLines = 0;
+		_detailLabel.adjustsFontSizeToFitWidth = NO;
+		_detailLabel.opaque = NO;
+		_detailLabel.backgroundColor = [UIColor clearColor];
+		_detailLabel.textColor = [UIColor colorWithWhite:0.225f alpha:1.0f];;
+		_detailLabel.shadowOffset = CGSizeMake(0, 1);
+		_detailLabel.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+		if (__isRtl) {
+            _detailLabel.textAlignment = self.detailLabel.textAlignment = NSTextAlignmentRight;
+        }
+		[self addSubview:_detailLabel];
 		[self setNeedsLayout];
-		[self setNeedsDisplay];
-	} else {
-		[self performSelectorOnMainThread:@selector(updateTitleLabel:) withObject:newText waitUntilDone:NO];
-		[self performSelectorOnMainThread:@selector(setNeedsLayout) withObject:nil waitUntilDone:NO];
-		[self performSelectorOnMainThread:@selector(setNeedsDisplay) withObject:nil waitUntilDone:NO];
+	}
+	return _detailLabel;
+}
+
+- (void)setAccessoryView:(UIView *)accessoryView {
+	if (accessoryView != _accessoryView) {
+		[_accessoryView removeFromSuperview];
+		_accessoryView = accessoryView;
+		if (_accessoryView) {
+			[self addSubview:_accessoryView];
+		}
+		[self setNeedsLayout];
 	}
 }
 
-- (NSString *)detailText
-{
-    return self.detailLabel.text;
+- (NSArray *)backgroundColors {
+	if (!_backgroundColors) {
+		UIColor *top = [UIColor colorWithRed:0.969 green:0.859 blue:0.475 alpha:1.000];
+		UIColor *bottom = [UIColor colorWithRed:0.937 green:0.788 blue:0.275 alpha:1.000];
+		_backgroundColors = @[top, bottom];
+	}
+	return _backgroundColors;
 }
 
-- (void)setDetailText:(NSString *)newText
-{
-    if ([NSThread isMainThread]) {
-        [self updateDetailLabel:newText];
-        [self setNeedsLayout];
-        [self setNeedsDisplay];
-    } else {
-        [self performSelectorOnMainThread:@selector(updateDetailLabel:) withObject:newText waitUntilDone:NO];
-        [self performSelectorOnMainThread:@selector(setNeedsLayout) withObject:nil waitUntilDone:NO];
-        [self performSelectorOnMainThread:@selector(setNeedsDisplay) withObject:nil waitUntilDone:NO];
-    }
-}
-
-- (void)updateTitleLabel:(NSString *)newText {
-    if (![self.titleText isEqualToString:newText]) {
-        self.titleLabel.text = [newText copy];
-    }
-}
-
-- (void)updateDetailLabel:(NSString *)newText {
-    if (![self.detailText isEqualToString:newText]) {
-        self.detailLabel.text = [newText copy];
-    }
-}
-
-- (dispatch_queue_t)tapQueue {
-    if (!_tapQueue) {
-        return dispatch_get_main_queue();
-    }
-    return _tapQueue;
+- (NSArray *)backgroundColorPositions {
+	if (!_backgroundColorPositions) {
+		_backgroundColorPositions = @[@0.0f, @1.0f];
+	}
+	return _backgroundColorPositions;
 }
 
 #pragma mark - Initializers
-- (id)init {
+- (id)init
+{
     return [self initWithFrame:CGRectMake(0.0f, 0.0f, 320.0f, 44.0f)];
 }
 
@@ -124,59 +145,32 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
-        self.clearsContextBeforeDrawing = NO;
-        self.titleText = nil;
-        self.detailText = nil;
-        self.minHeight = 44.0f;
-        
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        
-        self.titleLabel = [[UILabel alloc] initWithFrame:self.bounds];
-        self.detailLabel = [[UILabel alloc] initWithFrame:self.bounds];
-        if (isRtl)
-        {
-            self.titleLabel.textAlignment = self.detailLabel.textAlignment = NSTextAlignmentRight;
-        }
-        
-        self.backgroundColors = @[[UIColor colorWithRed:0.969 green:0.859 blue:0.475 alpha:1.000], [UIColor colorWithRed:0.937 green:0.788 blue:0.275 alpha:1.000]];
-        self.backgroundColorPositions = @[@0.0f, @1.0f];
-        
-        self.titleTextColor = [UIColor colorWithWhite:0.225f alpha:1.0f];
-        self.textColor = self.titleTextColor;
-        self.titleTextShadowColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
-        self.textShadowColor = self.titleTextShadowColor;
-        
-        // Gentle shadow settings. Path will be set up live, in [layoutSubviews] - danielgindi@gmail.com
+        // Gentle shadow settings. Path will be set up live, in [layoutSubviews]
         self.layer.shadowOffset = CGSizeMake(0, 1);
         self.layer.shadowRadius = 1.0f;
         self.layer.shadowColor = [UIColor colorWithWhite:0.450f alpha:1.0f].CGColor;
         self.layer.shadowOpacity = 1.0f;
-        
-        self.accessoryView = nil;
-        
-        self.opaque = YES;
-        self.isView = NO;
-        
-        self.onTouch = @selector(hide:);
+		// Hide on tap
+		UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
+		[self addGestureRecognizer:tap];
     }
     return self;
 }
 
 - (void)drawRect:(CGRect)rect
 {
-    // Routine to draw the gradient background - danielgindi@gmail.com
+    // Routine to draw the gradient background
     CGContextRef context = UIGraphicsGetCurrentContext();
     
     // Clear everything
     CGContextClearRect(context, rect);
     
-    float * gradientLocations = malloc(sizeof(float)*self.backgroundColors.count);
+    float *gradientLocations = malloc(sizeof(float)*self.backgroundColors.count);
     
-    NSNumber * n;
+    NSNumber *n;
     NSMutableArray * gradientColors = [NSMutableArray array];
-    for (NSUInteger j=0,len = self.backgroundColors.count; j<len; j++)
-    {
+    for (NSUInteger j=0,len = self.backgroundColors.count; j<len; j++) {
         [gradientColors addObject:(id)(((UIColor*)(self.backgroundColors)[j]).CGColor)];
         n = (self.backgroundColorPositions)[j];
         if (n) gradientLocations[j] = [n floatValue];
@@ -202,28 +196,15 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
     CGColorSpaceRelease(rgb);
     
     free(gradientLocations);
-    
-    [super drawRect:rect]; // I do not know if previous iOS versions depend on that for drawing subviews, or they do it on the CALayer level anyways.
 }
 
-#pragma mark - Defines
-
-#define HORIZONTAL_PADDING 15.0f
-#define VERTICAL_PADDING 15.0f
-#define ACCESSORY_PADDING 0.0f
-#define TITLE_FONT_SIZE 18.0f
-#define DETAIL_FONT_SIZE 13.0f
-#define ANIMATION_DURATION 0.3f
-
 #pragma mark - Class methods
-#pragma mark View Methods
 
 + (UIImageView *)imageViewWithImage:(UIImage *)image
 {
 	UIImageView *imageView = nil;
 	if (image) {
-		imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, image.size.width, image.size.height)];
-		imageView.image = image;
+		imageView = [[UIImageView alloc] initWithImage:image];
 	}
 	return imageView;
 }
@@ -231,27 +212,21 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 + (YRDropdownView *)dropdownInView:(UIView *)view title:(NSString *)title detail:(NSString *)detail accessoryView:(UIView *)accessoryView animated:(BOOL)animated
 {
 	YRDropdownView *dropdown = [[YRDropdownView alloc] initWithFrame:CGRectMake(0, 0, view.bounds.size.width, 44)];
-	if (![view isKindOfClass:[UIWindow class]])
-	{
-		dropdown.isView = YES;
-	}
     
-	if ((viewQueue && [viewQueue count] > 0) || (isQueuing && currentDropdown)) // add to queue - danielgindi@gmail.com
-	{
-		if (!viewQueue) viewQueue = [NSMutableArray array];
-		[viewQueue addObject:dropdown];
+	if ((__viewQueue && [__viewQueue count] > 0) || (__isQueuing && __currentDropdown)) {
+		if (!__viewQueue) __viewQueue = [NSMutableArray array];
+		[__viewQueue addObject:dropdown];
+	} else {
+		[__currentDropdown hide:__currentDropdown.shouldAnimate];
+		__currentDropdown = dropdown;
 	}
-	else
-	{
-		[currentDropdown hide:currentDropdown.shouldAnimate];
-		currentDropdown = dropdown;
+	
+	if (title) {
+		dropdown.titleLabel.text = title;
 	}
-	dropdown.titleText = title;
-    
 	if (detail) {
-		dropdown.detailText = detail;
+		dropdown.detailLabel.text = detail;
 	}
-    
 	if (accessoryView) {
 		dropdown.accessoryView = accessoryView;
 	}
@@ -275,8 +250,8 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 
 + (BOOL)hideDropdownInView:(UIView *)view animated:(BOOL)animated
 {
-    if (currentDropdown) {
-        [currentDropdown hide:animated];
+    if (__currentDropdown) {
+        [__currentDropdown hide:animated];
         return YES;
     }
     
@@ -290,8 +265,7 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
         YRDropdownView *dropdown = (YRDropdownView *)viewToRemove;
         [dropdown hide:animated];
         return YES;
-    }
-    else {
+    } else {
         return NO;
     }
 }
@@ -301,10 +275,10 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 	if (dropdownView == nil) {
 		return;
 	}
-	if (currentDropdown != nil && currentDropdown != dropdownView) {
+	if (__currentDropdown != nil && __currentDropdown != dropdownView) {
 		return;
 	}
-	currentDropdown = dropdownView;
+	__currentDropdown = dropdownView;
 	
 	[dropdownView.parentView addSubview:dropdownView];
 	[dropdownView show:dropdownView.shouldAnimate];
@@ -316,11 +290,12 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 	[dropdownView flipViewToOrientation:nil];
 }
 
-+ (BOOL)isCurrentlyShowing {
-    return currentDropdown != nil;
++ (BOOL)isCurrentlyShowing
+{
+    return __currentDropdown != nil;
 }
 
-#pragma mark - Methods
+#pragma mark - Showing and Hiding
 
 - (void)show:(BOOL)animated
 {
@@ -345,12 +320,7 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
                              self.alpha = 1.0;
                              self.frame = originalRc;
                          }
-                         completion:^(BOOL finished) {
-                             if (finished)
-                             {
-                                 
-                             }
-                         }];
+                         completion:nil];
         
     }
 }
@@ -360,25 +330,25 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 	[self hideWithAnimation:@(animated)];
 }
 
-- (void)hideWithAnimation:(NSNumber *)animated {
+- (void)hideWithAnimation:(NSNumber *)animated
+{
     if ([animated boolValue])
     {
         UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
         BOOL rotatedY = orientation == UIInterfaceOrientationPortraitUpsideDown && !self.isView;
-        int rotated = self.isView?0:(orientation == UIInterfaceOrientationLandscapeLeft ? 1 : (orientation == UIInterfaceOrientationLandscapeRight ? 2 : 0));
+        int rotated = self.isView ? 0 : (orientation == UIInterfaceOrientationLandscapeLeft ? 1 : (orientation == UIInterfaceOrientationLandscapeRight ? 2 : 0));
         [UIView animateWithDuration:ANIMATION_DURATION
                               delay:0.0
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
                              self.alpha = 0;
-                             self.frame = CGRectMake(
-                                                     self.frame.origin.x+(rotated==1?-self.frame.size.width:(rotated==2?self.frame.size.width:0)),
-                                                     self.frame.origin.y+(rotated?0:(rotatedY?self.frame.size.height:-self.frame.size.height)),
-                                                     self.frame.size.width,
-                                                     self.frame.size.height);
+							 CGRect f = self.frame;
+							 f.origin.x = f.origin.x + (rotated==1 ? -f.size.width : (rotated==2 ? f.size.width : 0));
+							 f.origin.y = f.origin.y + (rotated ? 0 : (rotatedY ? f.size.height : -f.size.height));
+							 self.frame = f;
                          }
                          completion:^(BOOL finished) {
-                                 [self done];
+							 [self done];
                          }];
     }
     else
@@ -393,22 +363,23 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
     [self removeFromSuperview];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    if (viewQueue.count && currentDropdown == self) // no need for nil check
+    if (__viewQueue.count && __currentDropdown == self) // no need for nil check
     {
-        currentDropdown = viewQueue[0];
-        [viewQueue removeObjectAtIndex:0];
-		[YRDropdownView presentDropdown:currentDropdown];
+        __currentDropdown = __viewQueue[0];
+        [__viewQueue removeObjectAtIndex:0];
+		[YRDropdownView presentDropdown:__currentDropdown];
     }
     else
     {
-        currentDropdown = nil;
+        __currentDropdown = nil;
     }
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    if (self.tapBlock) {
-        dispatch_async(self.tapQueue, self.tapBlock);
+#pragma mark - Gesures
+
+- (void)viewTapped:(UITapGestureRecognizer *)tapRecognizer {
+	if (self.tapBlock) {
+        dispatch_async(dispatch_get_main_queue(), self.tapBlock);
     }
     [self hide:self.shouldAnimate];
 }
@@ -418,115 +389,85 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 - (void)layoutSubviews
 {
 	CGRect bounds = self.bounds;
-    
-	// Set label properties
-	if ([self.titleText length] > 0) {
-		self.titleLabel.font = [UIFont boldSystemFontOfSize:TITLE_FONT_SIZE];
-		self.titleLabel.adjustsFontSizeToFitWidth = NO;
-		self.titleLabel.opaque = NO;
-		self.titleLabel.backgroundColor = [UIColor clearColor];
-		self.titleLabel.textColor = _titleTextColor;
-		self.titleLabel.shadowOffset = CGSizeMake(0, 1); // CALayer already translates pixel size
-		self.titleLabel.shadowColor = _titleTextShadowColor;
-		[self.titleLabel sizeToFitFixedWidth:bounds.size.width - (2 * HORIZONTAL_PADDING)];
-        
-		self.titleLabel.frame = CGRectMake(bounds.origin.x + HORIZONTAL_PADDING,
-                                           bounds.origin.y + VERTICAL_PADDING - 3,
-                                           bounds.size.width - (2 * HORIZONTAL_PADDING),
-                                           self.titleLabel.frame.size.height);
-		[self addSubview:self.titleLabel];
-	}
-    
-	if ([self.detailText length] > 0) {
-		self.detailLabel.font = [UIFont systemFontOfSize:DETAIL_FONT_SIZE];
-		self.detailLabel.numberOfLines = 0;
-		self.detailLabel.adjustsFontSizeToFitWidth = NO;
-		self.detailLabel.opaque = NO;
-		self.detailLabel.backgroundColor = [UIColor clearColor];
-		self.detailLabel.textColor = _textColor;
-		self.detailLabel.shadowOffset = CGSizeMake(0, 1);
-		self.detailLabel.shadowColor = _textShadowColor;
-		[self.detailLabel sizeToFitFixedWidth:bounds.size.width - (2 * HORIZONTAL_PADDING)];
-		
-		self.detailLabel.frame = CGRectMake(bounds.origin.x + HORIZONTAL_PADDING,
-                                            self.titleLabel.frame.origin.y + self.titleLabel.frame.size.height + 2,
-                                            bounds.size.width - (2 * HORIZONTAL_PADDING),
-                                            self.detailLabel.frame.size.height);
-        
-		[self addSubview:self.detailLabel];
-	} else {
-		CGRect rc = CGRectMake(self.titleLabel.frame.origin.x,
-                               9,
-                               self.titleLabel.frame.size.width,
-                               self.titleLabel.frame.size.height);
-		if (isRtl)
-		{
-			rc.origin.x = bounds.size.width - rc.origin.x - rc.size.width;
+	CGRect availableBounds = CGRectInset(bounds, HORIZONTAL_PADDING, VERTICAL_PADDING);
+	
+	CGRect accessoryFrame = CGRectZero;
+    CGRect titleFrame = CGRectZero;
+	CGRect detailFrame = CGRectZero;
+	
+	BOOL hasAccessory = !!_accessoryView;
+	BOOL hasTitle = [_titleLabel.text length] > 0;
+	BOOL hasDetail = [_detailLabel.text length] > 0;
+	
+	if (hasAccessory) {
+		// Compute accesory frame
+		accessoryFrame = self.accessoryView.frame;
+		if (__isRtl) {
+			accessoryFrame.origin.x = CGRectGetMaxX(availableBounds) - accessoryFrame.size.width;
+		} else {
+			accessoryFrame.origin.x = availableBounds.origin.x;
 		}
-		self.titleLabel.frame = rc;
+		accessoryFrame.origin.y = availableBounds.origin.y;
+		_accessoryView.frame = accessoryFrame;
+		// Adjust remaining available space
+		availableBounds.size.width -= accessoryFrame.size.width + HORIZONTAL_PADDING + ACCESSORY_PADDING;
+		if (!__isRtl) {
+			availableBounds.origin.x += accessoryFrame.size.width + HORIZONTAL_PADDING + ACCESSORY_PADDING;
+		}
 	}
+	
+	if (hasTitle) {
+		// Compute title frame
+		[_titleLabel sizeToFitFixedWidth:availableBounds.size.width];
+		titleFrame = CGRectMake(availableBounds.origin.x,
+								availableBounds.origin.y - 4,
+								availableBounds.size.width,
+								_titleLabel.frame.size.height);
+		// Match the accesssory height, if there's no details text and the accessory is larger
+		if (hasAccessory && !hasDetail && titleFrame.size.height < accessoryFrame.size.height) {
+			titleFrame.size.height = accessoryFrame.size.height;
+		}
+		// Adjust remaining available space
+		availableBounds.origin.y = CGRectGetMaxY(titleFrame);
+		availableBounds.size.height -= CGRectGetMaxY(titleFrame);
+	}
+	_titleLabel.frame = titleFrame;
+	
+	
+	if (hasDetail) {
+		// Compute detail frame
+		[_detailLabel sizeToFitFixedWidth:availableBounds.size.width];
+		detailFrame = CGRectMake(availableBounds.origin.x,
+								 availableBounds.origin.y - 2,
+								 availableBounds.size.width,
+								 _detailLabel.frame.size.height);
+		// Match the accesssory height, if there's no title text and the accessory is larger
+		if (hasAccessory && !hasTitle && detailFrame.size.height < accessoryFrame.size.height) {
+			detailFrame.size.height = accessoryFrame.size.height;
+		}
+		// Adjust remaining available space
+		availableBounds.origin.y = CGRectGetMaxY(detailFrame);
+		availableBounds.size.height -= CGRectGetMaxY(detailFrame);
+	}
+	_detailLabel.frame = detailFrame;
+	
     
-	if (self.accessoryView) {
-		CGRect rc;
-		
-		rc = self.accessoryView.frame;
-		rc.origin.x = bounds.origin.x + HORIZONTAL_PADDING;
-		rc.origin.y = bounds.origin.y + VERTICAL_PADDING;
-		if (isRtl)
-		{
-			rc.origin.x = bounds.origin.x + bounds.size.width - HORIZONTAL_PADDING - rc.size.width;
-		}
-		self.accessoryView.frame = rc;
-		
-		CGFloat padding = self.accessoryView.frame.origin.x + self.accessoryView.frame.size.width + ACCESSORY_PADDING;
-		
-		if ([self.titleLabel.text length] > 0) {
-			[self.titleLabel sizeToFitFixedWidth:bounds.size.width - padding - (HORIZONTAL_PADDING * 2)];
-			rc = self.titleLabel.frame;
-			rc.origin.x = rc.origin.x + padding;
-			if (isRtl)
-			{
-				rc.origin.x =  bounds.size.width - rc.origin.x - rc.size.width;
-			}
-			self.titleLabel.frame = rc;
-		}
-		
-		if ([self.detailLabel.text length] > 0) {
-			[self.detailLabel sizeToFitFixedWidth:bounds.size.width - padding - (HORIZONTAL_PADDING * 2)];
-			rc = self.detailLabel.frame;
-			rc.origin.x = rc.origin.x + padding;
-			if (isRtl)
-			{
-				rc.origin.x =  bounds.size.width - rc.origin.x - rc.size.width;
-			}
-			self.detailLabel.frame = rc;
-		}
-		
-		[self addSubview:self.accessoryView];
-	}
-    
-	CGFloat dropdownHeight = 29.0f;
-	if ([self.detailText length] > 0) {
-		dropdownHeight = CGRectGetMaxY(self.detailLabel.frame);
-	}
-	if (self.accessoryView) {
-		dropdownHeight = MAX(dropdownHeight, CGRectGetMaxY(self.accessoryView.frame));
-	}
-	dropdownHeight += VERTICAL_PADDING;
+	CGFloat dropdownHeight = availableBounds.origin.y + VERTICAL_PADDING;
+	dropdownHeight = MAX(dropdownHeight, CGRectGetMaxY(_accessoryView.frame) + VERTICAL_PADDING);
 	self.dropdownHeight = dropdownHeight;
     
 	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
 	BOOL rotated = UIInterfaceOrientationIsLandscape(orientation) && !self.isView;
     
-	[self setFrame:CGRectMake(self.frame.origin.x, self.frame.origin.y, rotated?dropdownHeight:self.frame.size.width, rotated?self.frame.size.height:dropdownHeight)];
+	CGRect frame = self.frame;
+	[self setFrame:CGRectMake(frame.origin.x, frame.origin.y, rotated ? dropdownHeight : frame.size.width, rotated ? frame.size.height : dropdownHeight)];
     
 	[self flipViewToOrientation:nil];
 }
 
 - (void)flipViewToOrientation:(NSNotification *)notification
 {
-    if (!currentDropdown.isView)
-    {
+    if (!__currentDropdown.isView) {
         UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
         
         if (!self.dropdownHeight) return;
@@ -556,12 +497,15 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
                 newFrame.size.height = self.dropdownHeight;
                 newFrame.size.width = statusBarSize.width;
                 break;
-        } 
+        }
         self.transform = CGAffineTransformMakeRotation(angle);
         self.frame = newFrame;
     }
 }
 
+- (BOOL)isView
+{
+	return ![self.parentView isKindOfClass:[UIWindow class]];
+}
+
 @end
-
-

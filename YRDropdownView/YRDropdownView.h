@@ -9,24 +9,19 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
+
 typedef void (^YRTapBlock)(void);
+
 
 @interface YRDropdownView : UIView
 
-@property (weak, nonatomic, readonly) NSString *titleText;
-@property (weak, nonatomic, readonly) NSString *detailText;
-
+@property (nonatomic, strong, readonly) UILabel *titleLabel;
+@property (nonatomic, strong, readonly) UILabel *detailLabel;
+@property (nonatomic, strong) UIView *accessoryView;
 @property (nonatomic, strong) NSArray * backgroundColors;
 @property (nonatomic, strong) NSArray * backgroundColorPositions;
-@property (nonatomic, strong) UIColor * titleTextColor;
-@property (nonatomic, strong) UIColor * textColor;
-@property (nonatomic, strong) UIColor * titleTextShadowColor;
-@property (nonatomic, strong) UIColor * textShadowColor;
-
-@property (nonatomic) float hideAfter;
+@property (nonatomic, assign) float hideAfter;
 @property (nonatomic, copy) YRTapBlock tapBlock;
-
-#pragma mark - View methods
 
 + (YRDropdownView *)dropdownInView:(UIView *)view
                              title:(NSString *)title
@@ -47,7 +42,6 @@ typedef void (^YRTapBlock)(void);
 + (void)toggleRtl:(BOOL)rtl;
 + (void)toggleQueuing:(BOOL)queuing;
 
-#pragma mark - Methods
 - (void)show:(BOOL)animated;
 - (void)hide:(BOOL)animated;
 - (void)flipViewToOrientation:(NSNotification *)notification;
