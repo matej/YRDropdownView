@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		25C4212F15EDD561008FCA6B /* YRDropdownView.m in Sources */ = {isa = PBXBuildFile; fileRef = 25C4212E15EDD561008FCA6B /* YRDropdownView.m */; };
 		2D3DC25114D73F8E00898E62 /* dropdown-alert@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2D3DC24F14D73F8E00898E62 /* dropdown-alert@2x.png */; };
 		2D3DC25214D73F8E00898E62 /* dropdown-alert.png in Resources */ = {isa = PBXBuildFile; fileRef = 2D3DC25014D73F8E00898E62 /* dropdown-alert.png */; };
 		2D5FCB4D14D30C2C00DA334B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D5FCB4C14D30C2C00DA334B /* UIKit.framework */; };
@@ -17,10 +18,12 @@
 		2D5FCB5D14D30C2C00DA334B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2D5FCB5C14D30C2C00DA334B /* AppDelegate.m */; };
 		2D5FCB6014D30C2C00DA334B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2D5FCB5F14D30C2C00DA334B /* ViewController.m */; };
 		2D5FCB6314D30C2C00DA334B /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2D5FCB6114D30C2C00DA334B /* ViewController.xib */; };
-		2DC084DA14D878460013863F /* YRDropdownView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DC084D714D878460013863F /* YRDropdownView.m */; };
+		6FCEBBC8166A4C520024C5CC /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6FCEBBC7166A4C520024C5CC /* Default-568h@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		25C4212D15EDD561008FCA6B /* YRDropdownView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YRDropdownView.h; sourceTree = "<group>"; };
+		25C4212E15EDD561008FCA6B /* YRDropdownView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YRDropdownView.m; sourceTree = "<group>"; };
 		2D3DC24F14D73F8E00898E62 /* dropdown-alert@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dropdown-alert@2x.png"; sourceTree = "<group>"; };
 		2D3DC25014D73F8E00898E62 /* dropdown-alert.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dropdown-alert.png"; sourceTree = "<group>"; };
 		2D5FCB4814D30C2B00DA334B /* YRDropdownExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YRDropdownExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -37,8 +40,7 @@
 		2D5FCB5F14D30C2C00DA334B /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		2D5FCB6214D30C2C00DA334B /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController.xib; sourceTree = "<group>"; };
 		2D5FCB7214D321BC00DA334B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		2DC084D614D878460013863F /* YRDropdownView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YRDropdownView.h; path = YRDropdownView/YRDropdownView.h; sourceTree = "<group>"; };
-		2DC084D714D878460013863F /* YRDropdownView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YRDropdownView.m; path = YRDropdownView/YRDropdownView.m; sourceTree = "<group>"; };
+		6FCEBBC7166A4C520024C5CC /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,18 +57,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2D3DC25414D7419F00898E62 /* YRDropdownView */ = {
+		25C4212C15EDD561008FCA6B /* YRDropdownView */ = {
 			isa = PBXGroup;
 			children = (
-				2DC084D614D878460013863F /* YRDropdownView.h */,
-				2DC084D714D878460013863F /* YRDropdownView.m */,
+				25C4212D15EDD561008FCA6B /* YRDropdownView.h */,
+				25C4212E15EDD561008FCA6B /* YRDropdownView.m */,
 			);
-			name = YRDropdownView;
-			sourceTree = "<group>";
+			path = YRDropdownView;
+			sourceTree = SOURCE_ROOT;
 		};
 		2D5FCB3D14D30C2B00DA334B = {
 			isa = PBXGroup;
 			children = (
+				6FCEBBC7166A4C520024C5CC /* Default-568h@2x.png */,
 				2D5FCB5214D30C2C00DA334B /* YRDropdownExample */,
 				2D5FCB4B14D30C2C00DA334B /* Frameworks */,
 				2D5FCB4914D30C2B00DA334B /* Products */,
@@ -99,7 +102,7 @@
 				2D5FCB5C14D30C2C00DA334B /* AppDelegate.m */,
 				2DC084D314D878180013863F /* View Controller */,
 				2D5FCB5314D30C2C00DA334B /* Supporting Files */,
-				2D3DC25414D7419F00898E62 /* YRDropdownView */,
+				25C4212C15EDD561008FCA6B /* YRDropdownView */,
 				2D3DC24F14D73F8E00898E62 /* dropdown-alert@2x.png */,
 				2D3DC25014D73F8E00898E62 /* dropdown-alert.png */,
 			);
@@ -153,7 +156,7 @@
 		2D5FCB3F14D30C2B00DA334B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "One Mighty Roar";
 			};
 			buildConfigurationList = 2D5FCB4214D30C2B00DA334B /* Build configuration list for PBXProject "YRDropdownExample" */;
@@ -182,6 +185,7 @@
 				2D5FCB6314D30C2C00DA334B /* ViewController.xib in Resources */,
 				2D3DC25114D73F8E00898E62 /* dropdown-alert@2x.png in Resources */,
 				2D3DC25214D73F8E00898E62 /* dropdown-alert.png in Resources */,
+				6FCEBBC8166A4C520024C5CC /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,7 +199,7 @@
 				2D5FCB5914D30C2C00DA334B /* main.m in Sources */,
 				2D5FCB5D14D30C2C00DA334B /* AppDelegate.m in Sources */,
 				2D5FCB6014D30C2C00DA334B /* ViewController.m in Sources */,
-				2DC084DA14D878460013863F /* YRDropdownView.m in Sources */,
+				25C4212F15EDD561008FCA6B /* YRDropdownView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +231,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -251,6 +259,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -267,6 +279,7 @@
 		2D5FCB6714D30C2C00DA334B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "YRDropdownExample/YRDropdownExample-Prefix.pch";
 				INFOPLIST_FILE = "YRDropdownExample/YRDropdownExample-Info.plist";
@@ -278,6 +291,7 @@
 		2D5FCB6814D30C2C00DA334B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "YRDropdownExample/YRDropdownExample-Prefix.pch";
 				INFOPLIST_FILE = "YRDropdownExample/YRDropdownExample-Info.plist";

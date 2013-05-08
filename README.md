@@ -1,17 +1,53 @@
-## YRDropdownView
+# YRDropdownView
 
-![Sample](https://github.com/onemightyroar/YRDropdownView/raw/gh-pages/images/screenshot.png "Sample")
+## Overview
 
 YRDropdownView is a view library for displaying stylish alerts, warnings, and errors. Based on Tweetbot's implementation, [MKInfoPanel](https://github.com/MugunthKumar/MKInfoPanelDemo) by Mugunth Kumar, [MBProgressHUD](https://github.com/jdg/MBProgressHUD) by Matej Bukovinski and [DSActivityView](https://github.com/joycodes/DSActivityView) by David Sinclair, among other influences. Its API has been hashed out to make the code easily implemented and very versatile.
 
-### Using YRDropdownView in your project?
-Be sure to contact me and let me know, I'd love to give your app some promo love. See the Contact section below to let me know!
+![Sample](https://github.com/onemightyroar/YRDropdownView/raw/gh-pages/images/screenshot.png "Sample")
+
+## Fork Information
+
+This repo is forked from [gregwym/YRDropdownView](https://github.com/gregwym/YRDropdownView) which forked from [onemightyroar/YRDropdownView](https://github.com/onemightyroar/YRDropdownView).
+
+### Changes
+
+- Add argument for custom colors
+
+    ``` objective-c
+    + (YRDropdownView *)showDropdownInView:(UIView *)view
+                                     title:(NSString *)title
+                                    detail:(NSString *)detail
+                                     image:(UIImage *)image
+                                 textColor:(UIColor *)textColor
+                           backgroundColor:(UIColor *)bgColor
+                                  animated:(BOOL)animated
+                                 hideAfter:(float)delay;
+    ```
+
+- Add ability to toggle queuing behavior
+- Use accessoryView instead of accessoryImageView, so can use not only `UIImageView` as accessory. i.e., `UIActivityIndicatorView`. To use this ability, call
+
+    ``` objective-c
+    + (YRDropdownView *)showDropdownInView:(UIView *)view
+                                     title:(NSString *)title
+                                    detail:(NSString *)detail
+                             accessoryView:(UIView *)accessoryView
+                                  animated:(BOOL)animated
+                                 hideAfter:(float)delay;
+    ```
+
+### Known Bugs
+
+Please refer to the [issue tracker](https://github.com/iOctocat/YRDropdownView/issues).
+
 ## Installation
 
-To use YRDropdownView:
+To use YRDropdownView: Install it with CocoaPods
 
-1. Copy over the `YRDropdownView` folder to your project folder. (Note: currently, the background is being drawn using a stretchable image, `bg-yellow.png`. Should you choose to supply your own background, you only need the `YRDropdownView.h\.m` files)
-2. Enjoy!
+      pod 'YRDropdownView', :git => 'https://github.com/iOctocat/YRDropdownView.git'
+
+Or copy over the `YRDropdownView` folder to your project folder. Enjoy!
 
 ## Usage
 
@@ -64,89 +100,58 @@ There are many different ways to customize the alert by calling different single
                                  image:(UIImage *)image
                               animated:(BOOL)animated
                              hideAfter:(float)delay;
+
 + (YRDropdownView *)showDropdownInView:(UIView *)view
                                  title:(NSString *)title
                                 detail:(NSString *)detail
                                  image:(UIImage *)image
-                       backgroundImage:(UIImage *)backgroundImage
+                             textColor:(UIColor *)textColor
+                       backgroundColor:(UIColor *)bgColor
                               animated:(BOOL)animated
                              hideAfter:(float)delay;
 
 + (YRDropdownView *)showDropdownInView:(UIView *)view
                                  title:(NSString *)title
                                 detail:(NSString *)detail
-                                 image:(UIImage *)image
-                       backgroundImage:(UIImage *)backgroundImage
-                       titleLabelColor:(UIColor *)titleLabelColor
-                      detailLabelColor:(UIColor *)detailLabelColor
+                         accessoryView:(UIView *)accessoryView
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+                         accessoryView:(UIView *)accessoryView
+                             textColor:(UIColor *)textColor
+                       backgroundColor:(UIColor *)bgColor
                               animated:(BOOL)animated
                              hideAfter:(float)delay;
 
 + (BOOL)hideDropdownInView:(UIView *)view;
 + (BOOL)hideDropdownInView:(UIView *)view animated:(BOOL)animated;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title
-                                  detail:(NSString *)detail;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title
-                                  detail:(NSString *)detail
-                                animated:(BOOL)animated;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title
-                                  detail:(NSString *)detail
-                                   image:(UIImage *)image
-                                animated:(BOOL)animated;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title
-                                  detail:(NSString *)detail
-                                   image:(UIImage *)image
-                                animated:(BOOL)animated
-                               hideAfter:(float)delay;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title
-                                  detail:(NSString *)detail
-                                   image:(UIImage *)image
-                         backgroundImage:(UIImage *)backgroundImage
-                                animated:(BOOL)animated
-                               hideAfter:(float)delay;
-
-+ (YRDropdownView *)showDropdownInWindow:(UIWindow *)window 
-                                   title:(NSString *)title
-                                  detail:(NSString *)detail
-                                   image:(UIImage *)image
-                         backgroundImage:(UIImage *)backgroundImage
-                         titleLabelColor:(UIColor *)titleLabelColor
-                        detailLabelColor:(UIColor *)detailLabelColor
-                                animated:(BOOL)animated
-                               hideAfter:(float)delay;
-
-+ (BOOL)hideDropdownInWindow:(UIWindow *)window;
-+ (BOOL)hideDropdownInWindow:(UIWindow *)window animated:(BOOL)animated;
 ```
+
+### Toggling the Dropdown's behavior
+
+``` objective-c
++ (void)toggleRtl:(BOOL)rtl;
++ (void)toggleQueuing:(BOOL)queuing;
+```
+
+When `toggleRtl:YES` is called, the order of elements in view will be reversed. i.e., accessoryView locates on the right of the labels.
+
+When `toggleQueuing:YES` is called, the Dropdowns will be queued. New Dropdown will not show until the last one disappears.
 
 ## Notes
 
 ### Automatic Reference Counting (ARC) support
-ARC support has been neglected in part for now. Your contributions are more than welcome, however. If you want to use YRDropdownView in an ARC project, just add the [add the 
-``` objective-c
--fno-objc-arc
-```
-compiler flag](http://stackoverflow.com/questions/6646052/how-can-i-disable-arc-for-a-single-file-in-a-project) to all YRDropdownView files in your project.
 
-## Contact
+ARC is now fully supported. Thanks Danielgindi's awesome work.
+
+## Origin Author's Contact
 
 - http://github.com/eliperkins
 - http://twitter.com/e_perkins1
 - eli@onemightyroar.com
-
 
 ## License
 

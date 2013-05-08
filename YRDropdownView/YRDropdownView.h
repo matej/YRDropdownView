@@ -10,31 +10,9 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface YRDropdownView : UIView
-{
-    NSString *titleText;
-    NSString *detailText;
-    UILabel *titleLabel;
-    UILabel *detailLabel;
-    UIImage *accessoryImage;
-    UIImageView *accessoryImageView;
-    SEL onTouch;
-    NSDate *showStarted;
-    BOOL shouldAnimate;
-}
 
-@property (nonatomic, copy) NSString *titleText;
-@property (nonatomic, copy) NSString *detailText;
-@property (nonatomic, strong) UIImage *accessoryImage;
-@property (nonatomic, assign) float minHeight;
-@property (nonatomic, assign) SEL onTouch;
-@property (nonatomic, assign) BOOL shouldAnimate;
-@property (nonatomic, strong) NSMutableArray * backgroundColors;
-@property (nonatomic, strong) NSMutableArray * backgroundColorPositions;
-@property (nonatomic, strong) UIColor * titleTextColor;
-@property (nonatomic, strong) UIColor * textColor;
-@property (nonatomic, strong) UIColor * titleTextShadowColor;
-@property (nonatomic, strong) UIColor * textShadowColor;
-@property (nonatomic, assign, readonly) BOOL isView;
+@property (weak, nonatomic, readonly) NSString *titleText;
+@property (weak, nonatomic, readonly) NSString *detailText;
 
 #pragma mark - View methods
 
@@ -63,12 +41,39 @@
                               animated:(BOOL)animated
                              hideAfter:(float)delay;
 
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+                                 image:(UIImage *)image
+							 textColor:(UIColor *)textColor
+					   backgroundColor:(UIColor *)bgColor
+							  animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+							 textColor:(UIColor *)textColor
+					   backgroundColor:(UIColor *)bgColor
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
 + (BOOL)hideDropdownInView:(UIView *)view;
 + (BOOL)hideDropdownInView:(UIView *)view animated:(BOOL)animated;
 
-+ (void)setRtl:(BOOL)rtl;
++ (void)presentDropdown:(YRDropdownView *)dropdownView;
++ (void)toggleRtl:(BOOL)rtl;
++ (void)toggleQueuing:(BOOL)queuing;
 
-#pragma mark -
+#pragma mark - Methods
 - (void)show:(BOOL)animated;
 - (void)hide:(BOOL)animated;
 - (void)flipViewToOrientation:(NSNotification *)notification;
