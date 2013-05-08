@@ -35,24 +35,18 @@
 }
 
 - (IBAction)showInView:(id)sender {
-    [YRDropdownView showDropdownInView:demoView 
-                             title:@"Warning" 
-                            detail:@"Me too! I want to try a really long detail message to see how it handles the line breaks and what not. Here's to hoping it works right the first time!" 
-                             image:[UIImage imageNamed:@"dropdown-alert"]
-                          animated:YES
-                         hideAfter:3];
+    YRDropdownView *dropdown = [YRDropdownView dropdownInView:demoView title:@"Warning" detail:@"Me too! I want to try a really long detail message to see how it handles the line breaks and what not. Here's to hoping it works right the first time!" image:[UIImage imageNamed:@"dropdown-alert"] animated:YES];
+    dropdown.hideAfter = 3;
+    [YRDropdownView presentDropdown:dropdown];
 }
 
 - (IBAction)showInWindow:(id)sender {
 	UIActivityIndicatorView *accessoryView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 	[accessoryView startAnimating];
 	
-    [YRDropdownView showDropdownInView:self.view.window
-								 title:@"Warning"
-								detail:@"Loading"
-						 accessoryView:accessoryView
-							  animated:NO
-							 hideAfter:0.0];
+    YRDropdownView *dropdown = [YRDropdownView dropdownInView:self.view.window title:@"Warning" detail:@"Loading" accessoryView:accessoryView animated:NO];
+    dropdown.hideAfter = 0;
+    [YRDropdownView presentDropdown:dropdown];
 }
 
 - (IBAction)hide:(id)sender {

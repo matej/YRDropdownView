@@ -9,66 +9,40 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
+typedef void (^YRTapBlock)(void);
+
 @interface YRDropdownView : UIView
 
 @property (weak, nonatomic, readonly) NSString *titleText;
 @property (weak, nonatomic, readonly) NSString *detailText;
 
+@property (nonatomic, strong) NSArray * backgroundColors;
+@property (nonatomic, strong) NSArray * backgroundColorPositions;
+@property (nonatomic, strong) UIColor * titleTextColor;
+@property (nonatomic, strong) UIColor * textColor;
+@property (nonatomic, strong) UIColor * titleTextShadowColor;
+@property (nonatomic, strong) UIColor * textShadowColor;
+
+@property (nonatomic) float hideAfter;
+@property (nonatomic, copy) YRTapBlock tapBlock;
+
 #pragma mark - View methods
 
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title;
++ (YRDropdownView *)dropdownInView:(UIView *)view
+                             title:(NSString *)title
+                            detail:(NSString *)detail
+                             image:(UIImage *)image
+                          animated:(BOOL)animated;
 
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail;
-
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail
-                              animated:(BOOL)animated;
-
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail
-                                 image:(UIImage *)image
-                              animated:(BOOL)animated;
-
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail
-                                 image:(UIImage *)image
-                              animated:(BOOL)animated
-                             hideAfter:(float)delay;
-
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail
-                                 image:(UIImage *)image
-							 textColor:(UIColor *)textColor
-					   backgroundColor:(UIColor *)bgColor
-							  animated:(BOOL)animated
-                             hideAfter:(float)delay;
-
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail
-						 accessoryView:(UIView *)accessoryView
-                              animated:(BOOL)animated
-                             hideAfter:(float)delay;
-
-+ (YRDropdownView *)showDropdownInView:(UIView *)view
-                                 title:(NSString *)title
-                                detail:(NSString *)detail
-						 accessoryView:(UIView *)accessoryView
-							 textColor:(UIColor *)textColor
-					   backgroundColor:(UIColor *)bgColor
-                              animated:(BOOL)animated
-                             hideAfter:(float)delay;
++ (YRDropdownView *)dropdownInView:(UIView *)view
+                             title:(NSString *)title
+                            detail:(NSString *)detail
+                     accessoryView:(UIView *)view
+                          animated:(BOOL)animated;
 
 + (BOOL)hideDropdownInView:(UIView *)view;
 + (BOOL)hideDropdownInView:(UIView *)view animated:(BOOL)animated;
-
++ (BOOL)isCurrentlyShowing;
 + (void)presentDropdown:(YRDropdownView *)dropdownView;
 + (void)toggleRtl:(BOOL)rtl;
 + (void)toggleQueuing:(BOOL)queuing;
