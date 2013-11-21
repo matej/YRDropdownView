@@ -12,9 +12,9 @@
 
 #define HORIZONTAL_PADDING 10.0f
 #define VERTICAL_PADDING 10.0f
-#define ACCESSORY_PADDING 0.0f
-#define TITLE_FONT_SIZE 16.0f
-#define DETAIL_FONT_SIZE 12.0f
+#define ACCESSORY_PADDING 5.0f
+#define TITLE_FONT_SIZE 15.0f
+#define DETAIL_FONT_SIZE 11.0f
 #define ANIMATION_DURATION 0.3f
 
 
@@ -75,9 +75,7 @@ static BOOL __isQueuing = NO;
 		_titleLabel.adjustsFontSizeToFitWidth = NO;
 		_titleLabel.opaque = NO;
 		_titleLabel.backgroundColor = [UIColor clearColor];
-		_titleLabel.textColor = [UIColor colorWithWhite:0.225f alpha:1.0f];
-		_titleLabel.shadowOffset = CGSizeMake(0, 1);
-		_titleLabel.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+		_titleLabel.textColor = [UIColor colorWithWhite:0.0f alpha:0.7f];
 		if (__isRtl) {
             _titleLabel.textAlignment = self.detailLabel.textAlignment = NSTextAlignmentRight;
         }
@@ -96,9 +94,7 @@ static BOOL __isQueuing = NO;
 		_detailLabel.adjustsFontSizeToFitWidth = NO;
 		_detailLabel.opaque = NO;
 		_detailLabel.backgroundColor = [UIColor clearColor];
-		_detailLabel.textColor = [UIColor colorWithWhite:0.225f alpha:1.0f];;
-		_detailLabel.shadowOffset = CGSizeMake(0, 1);
-		_detailLabel.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+		_detailLabel.textColor = [UIColor colorWithWhite:0.f alpha:0.5f];;
 		if (__isRtl) {
             _detailLabel.textAlignment = self.detailLabel.textAlignment = NSTextAlignmentRight;
         }
@@ -119,22 +115,6 @@ static BOOL __isQueuing = NO;
 	}
 }
 
-- (NSArray *)backgroundColors {
-	if (!_backgroundColors) {
-		UIColor *top = [UIColor colorWithRed:0.969 green:0.859 blue:0.475 alpha:1.000];
-		UIColor *bottom = [UIColor colorWithRed:0.937 green:0.788 blue:0.275 alpha:1.000];
-		_backgroundColors = @[top, bottom];
-	}
-	return _backgroundColors;
-}
-
-- (NSArray *)backgroundColorPositions {
-	if (!_backgroundColorPositions) {
-		_backgroundColorPositions = @[@0.0f, @1.0f];
-	}
-	return _backgroundColorPositions;
-}
-
 #pragma mark - Initializers
 - (id)init
 {
@@ -147,55 +127,18 @@ static BOOL __isQueuing = NO;
     if (self) {
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         // Gentle shadow settings. Path will be set up live, in [layoutSubviews]
-        self.layer.shadowOffset = CGSizeMake(0, 1);
-        self.layer.shadowRadius = 1.0f;
-        self.layer.shadowColor = [UIColor colorWithWhite:0.450f alpha:1.0f].CGColor;
-        self.layer.shadowOpacity = 1.0f;
+		BOOL isRetina = [UIScreen mainScreen].scale >= 2;
+		// Hairline
+        self.layer.shadowOffset = CGSizeMake(0.f, isRetina ? 0.5f : 1.f);
+        self.layer.shadowRadius = 0.0f;
+        self.layer.shadowColor = [UIColor darkGrayColor].CGColor;
+        self.layer.shadowOpacity = 0.5f;
+		self.backgroundColor = [UIColor colorWithRed:1.f green:.84f blue:0.16f alpha:0.95f];
 		// Hide on tap
 		UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped:)];
 		[self addGestureRecognizer:tap];
     }
     return self;
-}
-
-- (void)drawRect:(CGRect)rect
-{
-    // Routine to draw the gradient background
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    // Clear everything
-    CGContextClearRect(context, rect);
-    
-    float *gradientLocations = malloc(sizeof(float)*self.backgroundColors.count);
-    
-    NSNumber *n;
-    NSMutableArray * gradientColors = [NSMutableArray array];
-    for (NSUInteger j=0,len = self.backgroundColors.count; j<len; j++) {
-        [gradientColors addObject:(id)(((UIColor*)(self.backgroundColors)[j]).CGColor)];
-        n = (self.backgroundColorPositions)[j];
-        if (n) gradientLocations[j] = [n floatValue];
-        else gradientLocations[j] = j==0?0.0f:1.0f;
-    }
-    
-    // RGB color space. Free this later.
-    CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
-    
-    // create gradient
-    CGGradientRef gradient = CGGradientCreateWithColors(rgb, (__bridge CFArrayRef)gradientColors, gradientLocations);
-    
-    CGContextSaveGState(context);
-    CGContextClipToRect(context, rect);
-    CGContextDrawLinearGradient(context,
-                                gradient,
-                                CGPointMake(0, rect.origin.y),
-                                CGPointMake(0, rect.origin.y + rect.size.height),
-                                kCGGradientDrawsBeforeStartLocation);
-    CGContextRestoreGState(context);
-    
-    CGGradientRelease(gradient);
-    CGColorSpaceRelease(rgb);
-    
-    free(gradientLocations);
 }
 
 #pragma mark - Class methods
@@ -211,7 +154,7 @@ static BOOL __isQueuing = NO;
 
 + (YRDropdownView *)dropdownInView:(UIView *)view title:(NSString *)title detail:(NSString *)detail accessoryView:(UIView *)accessoryView animated:(BOOL)animated
 {
-	YRDropdownView *dropdown = [[YRDropdownView alloc] initWithFrame:CGRectMake(0, 0, view.bounds.size.width, 44)];
+	YRDropdownView *dropdown = [[self alloc] initWithFrame:CGRectMake(0, 0, view.bounds.size.width, 44)];
     
 	if ((__viewQueue && [__viewQueue count] > 0) || (__isQueuing && __currentDropdown)) {
 		if (!__viewQueue) __viewQueue = [NSMutableArray array];
@@ -438,7 +381,7 @@ static BOOL __isQueuing = NO;
 		// Compute detail frame
 		[_detailLabel sizeToFitFixedWidth:availableBounds.size.width];
 		detailFrame = CGRectMake(availableBounds.origin.x,
-								 availableBounds.origin.y - 2,
+								 availableBounds.origin.y,
 								 availableBounds.size.width,
 								 _detailLabel.frame.size.height);
 		// Match the accesssory height, if there's no title text and the accessory is larger

@@ -18,8 +18,6 @@ typedef void (^YRTapBlock)(void);
 @property (nonatomic, strong, readonly) UILabel *titleLabel;
 @property (nonatomic, strong, readonly) UILabel *detailLabel;
 @property (nonatomic, strong) UIView *accessoryView;
-@property (nonatomic, strong) NSArray * backgroundColors;
-@property (nonatomic, strong) NSArray * backgroundColorPositions;
 @property (nonatomic, assign) float hideAfter;
 @property (nonatomic, copy) YRTapBlock tapBlock;
 
