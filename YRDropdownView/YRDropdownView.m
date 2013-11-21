@@ -15,7 +15,9 @@
 #define ACCESSORY_PADDING 5.0f
 #define TITLE_FONT_SIZE 15.0f
 #define DETAIL_FONT_SIZE 11.0f
-#define ANIMATION_DURATION 0.3f
+#define ANIMATION_DURATION 0.5f
+#define FADE_IN_ANIMATION_DURATION 0.1f
+#define FADE_OUT_ANIMATION_DURATION 0.3f
 
 
 @implementation UILabel (YRDropdownView)
@@ -256,15 +258,21 @@ static BOOL __isQueuing = NO;
                                 originalRc.size.height);
         self.alpha = 0;
         
-        [UIView animateWithDuration:ANIMATION_DURATION
+        [UIView animateWithDuration:FADE_IN_ANIMATION_DURATION
                               delay:0.0
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
                              self.alpha = 1.0;
-                             self.frame = originalRc;
                          }
                          completion:nil];
-        
+		
+		[UIView animateWithDuration:ANIMATION_DURATION
+							  delay:0.0
+			 usingSpringWithDamping:1.f
+			  initialSpringVelocity:1.f
+							options:0 animations:^{
+								self.frame = originalRc;
+							} completion:nil];
     }
 }
 
@@ -280,19 +288,27 @@ static BOOL __isQueuing = NO;
         UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
         BOOL rotatedY = orientation == UIInterfaceOrientationPortraitUpsideDown && !self.isView;
         int rotated = self.isView ? 0 : (orientation == UIInterfaceOrientationLandscapeLeft ? 1 : (orientation == UIInterfaceOrientationLandscapeRight ? 2 : 0));
-        [UIView animateWithDuration:ANIMATION_DURATION
-                              delay:0.0
+        
+		[UIView animateWithDuration:FADE_OUT_ANIMATION_DURATION
+                              delay:0.
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
-                             self.alpha = 0;
-							 CGRect f = self.frame;
-							 f.origin.x = f.origin.x + (rotated==1 ? -f.size.width : (rotated==2 ? f.size.width : 0));
-							 f.origin.y = f.origin.y + (rotated ? 0 : (rotatedY ? f.size.height : -f.size.height));
-							 self.frame = f;
+                             self.alpha = 0.0;
                          }
-                         completion:^(BOOL finished) {
-							 [self done];
-                         }];
+                         completion:nil];
+		
+		[UIView animateWithDuration:ANIMATION_DURATION
+							  delay:0.0
+			 usingSpringWithDamping:1.f
+			  initialSpringVelocity:1.f
+							options:0 animations:^{
+								CGRect f = self.frame;
+								f.origin.x = f.origin.x + (rotated==1 ? -f.size.width : (rotated==2 ? f.size.width : 0));
+								f.origin.y = f.origin.y + (rotated ? 0 : (rotatedY ? f.size.height : -f.size.height));
+								self.frame = f;
+							} completion:^(BOOL finished) {
+								[self done];
+							}];
     }
     else
     {
