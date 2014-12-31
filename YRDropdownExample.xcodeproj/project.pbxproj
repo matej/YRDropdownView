@@ -75,6 +75,7 @@
 				2D5FCB4914D30C2B00DA334B /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
 		};
 		2D5FCB4914D30C2B00DA334B /* Products */ = {
 			isa = PBXGroup;
