@@ -1,6 +1,5 @@
 Pod::Spec.new do |s|
   s.name     = 'YRDropdownView'
-  s.ios.deployment_target = '6.0'
   s.version  = '0.2.1'
   s.platform = :ios
   s.license  = 'MIT'
