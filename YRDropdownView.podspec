@@ -1,6 +1,8 @@
 Pod::Spec.new do |s|
   s.name     = 'YRDropdownView'
   s.version  = '0.2.1'
+  s.ios.deployment_target  = '7.0'
+  s.osx.deployment_target  = '10.10'
   s.platform = :ios
   s.license  = 'MIT'
   s.summary  = 'YRDropdownView is a view library for displaying stylish alerts, warnings, and errors.'
