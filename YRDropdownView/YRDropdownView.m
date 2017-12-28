@@ -252,6 +252,7 @@ static BOOL __isQueuing = NO;
 		int rotated = self.hasViewCoordinates?0:(orientation == UIInterfaceOrientationLandscapeLeft ? 1 : (orientation == UIInterfaceOrientationLandscapeRight ? 2 : 0));
 		if (orientation != UIInterfaceOrientationPortrait) [self layoutSubviews];
 		CGRect originalRc = self.frame;
+		originalRc.size.height = self.intrinsicHeight;
 		self.frame = CGRectMake(
 								originalRc.origin.x+(rotated==1?-originalRc.size.width:(rotated==2?originalRc.size.width:0)),
 								originalRc.origin.y+(rotated?0:(rotatedY?originalRc.size.height:-originalRc.size.height)),
@@ -349,7 +350,7 @@ static BOOL __isQueuing = NO;
 - (void)layoutSubviews
 {
 	CGRect bounds = self.bounds;
-	bounds.origin.y += self.statusBarOffset;
+	bounds.origin.y += self.topOffset;
 	bounds.size.height -= self.statusBarOffset;
 	CGRect availableBounds = CGRectInset(bounds, HORIZONTAL_PADDING, VERTICAL_PADDING);
 
@@ -479,6 +480,20 @@ static BOOL __isQueuing = NO;
 		}
 	}
 	return 0.f;
+}
+
+- (CGFloat)intrinsicHeight
+{
+	return 44.f + self.topOffset;
+}
+
+- (CGFloat)topOffset
+{
+	if (@available(iOS 11, *)) {
+		return self.safeAreaInsets.top;
+	} else {
+		return self.statusBarOffset;
+	}
 }
 
 - (BOOL)hasViewCoordinates
